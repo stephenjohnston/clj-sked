@@ -62,16 +62,9 @@
       (future-cancel @bg-future)
       false)))
 
-;; TODO: Need some validation on the item to ensure it contains
-;;   :fire-time
-;;   :name
-;;   :cron-expression (or :trigger?)
-;;   :job-fn
-(defn insert-job [scheduler item]
+(defn insert-job-into-maps [scheduler item]
   (let [next-fire-map (:next-fire-map scheduler)
-        name-map (:name-map scheduler)
-        cancelled? (cancel-future? scheduler item)
-        bg-future (:background-future scheduler)]
+        name-map (:name-map scheduler)]
     (dosync
      (let []
        (alter next-fire-map (fn [map itm] (let [lst (get map (:fire-time itm) (list))]
@@ -79,7 +72,18 @@
                                              (assoc map (:fire-time itm) (list itm))
                                              (assoc map (:fire-time itm) (conj lst item))
                                              ))) item)
-       (alter name-map assoc (:name item) item)))
+       (alter name-map assoc (:name item) item)))))
+
+;; TODO: Need some validation on the item to ensure it contains
+;;   :fire-time
+;;   :name
+;;   :cron-expression (or :trigger?)
+;;   :job-fn
+(defn insert-job [scheduler item]
+
+  (let [cancelled? (cancel-future? scheduler item)
+        bg-future (:background-future scheduler)]
+    (insert-job-into-maps scheduler item)
     (when (or cancelled? (nil? @bg-future) (future-done? @bg-future))
       (prn "starting scheduler")
        (start-scheduler scheduler))))
