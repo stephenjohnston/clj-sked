@@ -24,15 +24,56 @@
 ;;      (is (= (future-done? @(:background-future sked))))
       )))
 
+(defn insert-job-into-maps-helper [joblist]
+  (let [sked (create-scheduler)]
+    (doseq [job joblist]
+      (insert-job-into-maps sked job))
+    (keys @(:next-fire-map sked))))
+
+
 (deftest insert-job-into-maps-test
   (testing "Ensure that the order of the next-fire-map is correct"
-    (let [sked (create-scheduler)
-          ;; after inserting these jobs, the next-fire-map should have job3, job1, then job2
-          dmy   (insert-job-into-maps sked {:fire-time 5000 :name "job1" })
-          dmy2  (insert-job-into-maps sked {:fire-time 6500 :name "job2" })
-          dmy3  (insert-job-into-maps sked {:fire-time 1000 :name "job3" })
-          nfm   @(:next-fire-map sked)
-          keys  (vec (keys nfm))]
+    ;; after inserting these jobs, the next-fire-map should have job3, job1, then job2
+    ;; test inserting these in reverse order
+    (let [joblist '( {:fire-time 6500 :name "job1" }
+                     {:fire-time 5000 :name "job2" }
+                     {:fire-time 1000 :name "job3" } )
+          keys  (insert-job-into-maps-helper joblist)]
       (is (= 1000 (nth keys 0)))
       (is (= 5000 (nth keys 1)))
       (is (= 6500 (nth keys 2))))))
+
+(deftest insert-job-into-maps-test2
+  (testing "Ensure that the order of the next-fire-map is correct"
+    ;; after inserting these jobs, the next-fire-map should have job3, job1, then job2
+    ;; test inserting these in order
+    (let [joblist '( {:fire-time 1000 :name "job1" }
+                     {:fire-time 5000 :name "job2" }
+                     {:fire-time 6500 :name "job3" } )
+          keys  (insert-job-into-maps-helper joblist)]
+      (is (= 1000 (nth keys 0)))
+      (is (= 5000 (nth keys 1)))
+      (is (= 6500 (nth keys 2))))))
+
+(deftest insert-job-into-maps-test3
+  (testing "Ensure that the order of the next-fire-map is correct"
+    ;; after inserting these jobs, the next-fire-map should have job3, job1, then job2
+    (let [joblist '( {:fire-time 6500 :name "job1" }
+                     {:fire-time 1000 :name "job2" }
+                     {:fire-time 5000 :name "job3" } )
+          keys  (insert-job-into-maps-helper joblist)]
+      (is (= 1000 (nth keys 0)))
+      (is (= 5000 (nth keys 1)))
+      (is (= 6500 (nth keys 2))))))
+
+(deftest get-job-test1
+  (testing "Check to make sure we can retreive inserted jobs by name"
+    (let [jobvec [ {:fire-time 6500 :name "job3" }
+                   {:fire-time 1000 :name "job1" }
+                   {:fire-time 5000 :name "job2" }]
+          sked (create-scheduler)]
+      (doseq [job jobvec]
+        (insert-job-into-maps sked job))
+      (is (= (get-job sked "job1") (nth jobvec 1)))
+      (is (= (get-job sked "job2") (nth jobvec 2)))
+      (is (= (get-job sked "job3") (nth jobvec 0))))))

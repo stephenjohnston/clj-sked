@@ -89,4 +89,4 @@
        (start-scheduler scheduler))))
 
 (defn get-job [scheduler item-name]
-  (get (:name-map scheduler) item-name))
+  (get @(:name-map scheduler) item-name))
