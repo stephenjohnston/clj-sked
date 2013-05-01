@@ -1,9 +1,11 @@
-(ns clj-sked.core)
+(ns clj-sked.core
+  (:import (java.util.concurrent Executors)))
 
 (defn create-scheduler []
   { :next-fire-map (ref (sorted-map))
     :name-map (ref (sorted-map))
     :background-future (ref nil)
+    :pool (Executors/newFixedThreadPool 10)
   } )
 
 (defn- get-fire-map-first-entry [fire-map-first-entry]
@@ -34,9 +36,11 @@
 
 (defn- service-next-job [scheduler next-items-lst]
   (sleep-until-fire-time (:fire-time (first next-items-lst)))
-  (doseq [item next-items-lst]
-    ;;(prn "*** firing and removing job for " (:name item))
-    (remove-job scheduler (:name item))))
+   (let [tasks (map (fn [item]
+                     (prn "*** firing and removing job for" (:name item))
+                     (deliver (:promise item) ((:job-fn item)))
+                     (remove-job scheduler (:name item)))  next-items-lst)]
+     (.invokeAll (:pool scheduler) tasks)))
 
 (defn service-all-scheduled-jobs [scheduler]
   (loop []
@@ -81,12 +85,15 @@
 ;;   :job-fn
 (defn insert-job [scheduler item]
 
-  (let [cancelled? (cancel-future? scheduler item)
+  (let [ret-val (promise)
+        new-item (assoc item :promise ret-val)
+        cancelled? (cancel-future? scheduler new-item)
         bg-future (:background-future scheduler)]
-    (insert-job-into-maps scheduler item)
+    (insert-job-into-maps scheduler new-item)
     (when (or cancelled? (nil? @bg-future) (future-done? @bg-future))
       (prn "starting scheduler")
-       (start-scheduler scheduler))))
+      (start-scheduler scheduler))
+    ret-val))
 
 (defn get-job [scheduler item-name]
   (get @(:name-map scheduler) item-name))
