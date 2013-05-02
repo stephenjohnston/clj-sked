@@ -1,7 +1,6 @@
 # clj-sked
 Our goal is to create a high performance scheduler, written entirely in clojure.
-The project is actively being developed.  As of right now, the scheduler is not yet functioning or complete.
-
+The project is actively being developed.  As of right now, the scheduler is functional, but it still needs some cleanup. 
 Example usage:
 ```clojure
     user> (defn compute-answer [] 42) ;; the job I want to schedule
