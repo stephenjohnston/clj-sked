@@ -8,7 +8,9 @@ Example usage:
     #'user/compute-answer
     user> (def sked (create-scheduler)) ;; create the scheduler
     #'user/sked
-    user> (def mypromise (insert-job sked {:name "foo" :fire-time (+ 3000 (System/currentTimeMillis)) :job-fn compute-answer}))
+    user> (def mypromise (insert-job sked {:name "foo" 
+                                           :fire-time (+ 3000 (System/currentTimeMillis)) 
+                                           :job-fn compute-answer}))
     "starting scheduler"
     #'user/mypromise
     user> @mypromise ;; wait for the job to fire and display the result
