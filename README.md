@@ -10,10 +10,8 @@ Example usage:
     user> (def mypromise (insert-job sked {:name "foo"  ; schedule the job to fire in 3 seconds
                                            :fire-time (+ 3000 (System/currentTimeMillis)) 
                                            :job-fn compute-answer}))
-    "starting scheduler"
     #'user/mypromise
     user> @mypromise ; wait for the job to fire and display the result
-    "*** firing and removing job for" "foo"
     42
 ```
 ## License
