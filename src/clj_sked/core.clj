@@ -68,10 +68,7 @@
     (dosync
      (let []
        (alter next-fire-map (fn [map itm] (let [lst (get map (:fire-time itm) (list))]
-                                           (if (empty? lst)
-                                             (assoc map (:fire-time itm) (list itm))
-                                             (assoc map (:fire-time itm) (conj lst item))
-                                             ))) item)
+                                           (assoc map (:fire-time itm) (conj lst item)))) item)
        (alter name-map assoc (:name item) item)))))
 
 ;; TODO: Need some validation on the item to ensure it contains
