@@ -9,14 +9,12 @@
   } )
 
 (defn- get-fire-map-first-entry [fire-map-first-entry]
-  (if (nil? fire-map-first-entry)
-    nil
+  (when fire-map-first-entry
     (second fire-map-first-entry)))
 
 (defn get-next-fire-time [scheduler]
   (let [next-fire-map (:next-fire-map scheduler)]
-    (if (empty? @next-fire-map)
-      nil
+    (when-not (empty? @next-fire-map)
       (get-fire-map-first-entry (first @next-fire-map)))))
 
 (defn remove-job [scheduler item-name]
@@ -44,11 +42,9 @@
 
 (defn service-all-scheduled-jobs [scheduler]
   (loop []
-    (if (.isInterrupted (Thread/currentThread)) ;; if this thread has been interrupted, return nil (and stop looping)
-      nil
+    (when-not (.isInterrupted (Thread/currentThread)) ;; if this thread has been interrupted, return nil (and stop looping)
       (let [next-items-lst (get-next-fire-time scheduler)]
-        (if (nil? next-items-lst) ;; if there is no task to fire, return nil (and stop looping)
-          nil
+        (when-not (nil? next-items-lst) ;; if there is no task to fire, return nil (and stop looping)
           (do ;; process the next job
             (service-next-job scheduler next-items-lst)
             (recur)))))))

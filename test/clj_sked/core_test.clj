@@ -77,3 +77,14 @@
       (is (= (get-job sked "job1") (nth jobvec 1)))
       (is (= (get-job sked "job2") (nth jobvec 2)))
       (is (= (get-job sked "job3") (nth jobvec 0))))))
+
+(def sleep-until-fire-time
+  (ns-resolve 'clj-sked.core
+              'sleep-until-fire-time))
+
+(deftest sleep-until-fire-time-test
+  "Test to make sure sleeping until a time of one second from now works correctly"
+  (let [start-time (System/currentTimeMillis)
+        slp (sleep-until-fire-time (+ 1000 start-time))
+        end-time (System/currentTimeMillis)]
+    (is (> end-time (+ 1000 start-time)))))
