@@ -17,6 +17,8 @@
     (when-not (empty? @next-fire-map)
       (get-fire-map-first-entry (first @next-fire-map)))))
 
+;; remove job has a bug where you could potentially remove ALL jobs that are schedulded to fire at the items' fire-time.
+;; TODO: fix
 (defn remove-job [scheduler item-name]
   (let [next-fire-map (:next-fire-map scheduler)
         name-map (:name-map scheduler)
