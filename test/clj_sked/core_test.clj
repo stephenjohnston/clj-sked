@@ -87,4 +87,4 @@
   (let [start-time (System/currentTimeMillis)
         slp (sleep-until-fire-time (+ 1000 start-time))
         end-time (System/currentTimeMillis)]
-    (is (> end-time (+ 1000 start-time)))))
+    (is (>= end-time (+ 1000 start-time)))))
